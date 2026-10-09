@@ -1198,7 +1198,7 @@ if is_admin_mode:
         existing_nums = [r[0] for r in table_statuses]
         
         # ลิงก์ร้านสำหรับสร้าง QR-Code อัตโนมัติ
-        base_url_for_qr = "https://fahsai-tumnua-xwwixnezbpyxzpwvkvhad3.streamlit.app"
+        base_url_for_qr = "https://tumnua1-cae26py9kvbzmz4juo3sey.streamlit.app/"
 
         # ส่วนที่ 1: เมนู เพิ่ม / ลบ โต๊ะอาหารในร้าน
         st.markdown("### ⚙️ 1. เพิ่ม / ลบ โต๊ะอาหารในร้าน")
