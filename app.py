@@ -213,6 +213,105 @@ div[data-testid="stRadio"] label[data-baseweb="radio"][aria-checked="true"] span
     font-weight: 700 !important;
 }
 
+/* 🔖 แถบเมนูแท็บสไตล์ที่คั่นหนังสือ (Bookmark Tabs) ขอบบนมน 2 มุม */
+div[data-baseweb="tab-list"] {
+    gap: 8px !important;
+    background-color: transparent !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    padding-bottom: 0px !important;
+}
+
+div[data-baseweb="tab-highlight"] {
+    display: none !important; /* ซ่อนเส้นขีดสีแดงเดิม */
+}
+
+/* ตั้งค่าสไตล์พื้นฐานของแท็บทั้งหมด */
+button[data-baseweb="tab"] {
+    border-top-left-radius: 12px !important;   /* มนมุมบนซ้าย */
+    border-top-right-radius: 12px !important;  /* มนมุมบนขวา */
+    border-bottom-left-radius: 0px !important;
+    border-bottom-right-radius: 0px !important;
+    padding: 10px 18px !important;
+    margin-right: 4px !important;
+    font-weight: 600 !important;
+    font-size: 15px !important;
+    transition: all 0.2s ease-in-out !important;
+    border: 1px solid transparent !important;
+    border-bottom: none !important;
+}
+
+/* 🟢 แท็บที่ 1: จัดการโต๊ะอาหาร & เคลียร์โต๊ะ -> สีเขียว (Green / Mint Bookmark) */
+button[data-baseweb="tab"]:nth-of-type(1) {
+    background-color: #ecfdf5 !important;
+    color: #065f46 !important;
+    border-color: #a7f3d0 !important;
+}
+button[data-baseweb="tab"]:nth-of-type(1):hover {
+    background-color: #d1fae5 !important;
+    color: #047857 !important;
+}
+button[data-baseweb="tab"]:nth-of-type(1)[aria-selected="true"] {
+    background: linear-gradient(180deg, #10b981 0%, #059669 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 -2px 10px rgba(16, 185, 129, 0.3) !important;
+    font-weight: 700 !important;
+    border-color: #047857 !important;
+}
+
+/* 🟤 แท็บที่ 2: จอครัว & เคาน์เตอร์คิดเงิน -> สีน้ำตาล (Warm Brown Bookmark) */
+button[data-baseweb="tab"]:nth-of-type(2) {
+    background-color: #fdf8f6 !important;
+    color: #7c2d12 !important;
+    border-color: #fed7aa !important;
+}
+button[data-baseweb="tab"]:nth-of-type(2):hover {
+    background-color: #ffedd5 !important;
+    color: #9a3412 !important;
+}
+button[data-baseweb="tab"]:nth-of-type(2)[aria-selected="true"] {
+    background: linear-gradient(180deg, #9a3412 0%, #7c2d12 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 -2px 10px rgba(154, 52, 18, 0.3) !important;
+    font-weight: 700 !important;
+    border-color: #7c2d12 !important;
+}
+
+/* 🔵 แท็บที่ 3: เมนูขายดี -> สีฟ้า (Sky Blue Bookmark) */
+button[data-baseweb="tab"]:nth-of-type(3) {
+    background-color: #f0f9ff !important;
+    color: #0369a1 !important;
+    border-color: #bae6fd !important;
+}
+button[data-baseweb="tab"]:nth-of-type(3):hover {
+    background-color: #e0f2fe !important;
+    color: #0284c7 !important;
+}
+button[data-baseweb="tab"]:nth-of-type(3)[aria-selected="true"] {
+    background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 -2px 10px rgba(2, 132, 199, 0.3) !important;
+    font-weight: 700 !important;
+    border-color: #0284c7 !important;
+}
+
+/* 🟣 แท็บที่ 4: ประวัติลูกค้า -> สีม่วง/พาสเทลสุภาพ */
+button[data-baseweb="tab"]:nth-of-type(4) {
+    background-color: #faf5ff !important;
+    color: #6b21a8 !important;
+    border-color: #e9d5ff !important;
+}
+button[data-baseweb="tab"]:nth-of-type(4):hover {
+    background-color: #f3e8ff !important;
+    color: #7e22ce !important;
+}
+button[data-baseweb="tab"]:nth-of-type(4)[aria-selected="true"] {
+    background: linear-gradient(180deg, #9333ea 0%, #7e22ce 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 -2px 10px rgba(147, 51, 234, 0.3) !important;
+    font-weight: 700 !important;
+    border-color: #7e22ce !important;
+}
+
 /* ซ่อนแถบเมนูที่ไม่จำเป็นของ Streamlit เพื่อประสบการณ์แบบ App แท้ */
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
@@ -555,7 +654,7 @@ def get_base64_image(image_path):
             return base64.b64encode(img_file.read()).decode()
     return ""
 
-def get_current_base_url(default="hhttps://tumnua1-cae26py9kvbzmz4juo3sey.streamlit.app/"):
+def get_current_base_url(default="https://tumnua1-cae26py9kvbzmz4juo3sey.streamlit.app"):
     """
     ตรวจจับ URL ของเว็บไซต์อัตโนมัติจาก Request Headers เพื่อใช้สร้าง QR Code
     ข้อดี: ไม่ว่าจะนำโค้ดไปเปิดใช้งานกับร้านใหม่ บัญชีใหม่ หรือโดเมนใดๆ 
@@ -1676,7 +1775,13 @@ else:
         st.write("---")
         st.warning("⚠️ ขณะนี้ทางร้านยังไม่ได้เปิดโต๊ะอาหารในระบบ")
         st.info("กรุณาติดต่อพนักงานที่เคาน์เตอร์ หรือเปิดโต๊ะในระบบหลังร้านก่อนนะคะ 🌶️")
-        st.markdown("<div style='text-align: center; margin-top: 15px;'><a href='/?mode=admin' target='_top' style='color: #ea580c; text-decoration: none; font-weight: bold;'>⚙️ ไปที่ระบบจัดการหลังร้าน</a></div>", unsafe_allow_html=True)
+        
+        col_adm1, col_adm2, col_adm3 = st.columns([1, 2, 1])
+        with col_adm2:
+            if st.button("⚙️ ไปที่ระบบจัดการหลังร้าน (Admin)", type="primary", use_container_width=True):
+                st.query_params["mode"] = "admin"
+                st.rerun()
+            st.markdown("<div style='text-align: center; margin-top: 8px;'><a href='/?mode=admin' target='_top' style='color: #ea580c; text-decoration: underline; font-weight: bold; font-size: 14px;'>หรือคลิกที่นี่หากปุ่มไม่ตอบสนอง</a></div>", unsafe_allow_html=True)
         st.stop()
         valid_tables = [1]
 
