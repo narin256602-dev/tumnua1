@@ -1466,15 +1466,6 @@ if is_admin_mode:
                             else:
                                 st.error("❌ ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้งค่ะ")
 
-                st.markdown("""
-                <div style='background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 10px 14px; margin-top: 14px; font-size: 0.88rem; color: #92400e;'>
-                    💡 <b>บัญชีเริ่มต้นของระบบ (Default Login):</b><br>
-                    • ชื่อผู้ใช้: <code>admin</code><br>
-                    • รหัสผ่าน: <code>admin1234</code><br>
-                    <i>(รหัสผ่านถูกเข้ารหัส SHA-256 + Salt เก็บในฐานข้อมูลอย่างปลอดภัย)</i>
-                </div>
-                """, unsafe_allow_html=True)
-
         render_app_footer()
         st.stop()
 
