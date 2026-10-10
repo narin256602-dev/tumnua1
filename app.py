@@ -36,7 +36,7 @@ def get_thai_now():
 # --- ตั้งค่าหน้าเว็บ Streamlit เบื้องต้น ---
 st.set_page_config(
     page_title="ฟ้าใสตำนัว",               # ชื่อที่จะแสดงบนแท็บของเบราว์เซอร์
-    page_icon="🌶️",                         # ไอคอน Favicon ของแท็บเว็บ
+    page_icon="🩵🌻",                         # ไอคอน Favicon ของแท็บเว็บ
     layout="wide",                          # ใช้พื้นที่หน้าจอแบบเต็มความกว้าง (Wide mode)
     initial_sidebar_state="collapsed"       # ซ่อนแถบเมนูด้านข้างเริ่มต้น เพื่อให้ดูเหมือน App มือถือ
 )
