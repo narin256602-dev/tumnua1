@@ -218,6 +218,39 @@ div[data-testid="stRadio"] label[data-baseweb="radio"][aria-checked="true"] span
 footer {visibility: hidden;}
 header {visibility: hidden;}
 </style>
+<script>
+(function() {
+    try {
+        var currentHref = window.location.href;
+        var currentPath = window.location.pathname;
+        var currentSearch = window.location.search;
+
+        // ถ้าพบว่าติด /~/+/ หรือมี mode=admin ซ้ำซ้อน หรือ parameter เพี้ยน
+        if (currentHref.includes('mode=admin') || currentHref.includes('/~/+/')) {
+            var isAdmin = currentHref.includes('mode=admin');
+            var isTable = currentHref.includes('table=');
+            var cleanSearch = '';
+            
+            if (isAdmin) {
+                cleanSearch = '?mode=admin';
+            } else if (isTable) {
+                var match = currentHref.match(/table=([0-9]+)/);
+                cleanSearch = match ? '?table=' + match[1] : '';
+            }
+
+            var cleanUrl = window.location.origin + '/' + cleanSearch;
+
+            // 1. ถ้าอยู่ภายใน iframe พรีวิวของ streamlit cloud (/~/+/) ให้ดันออกสู่หน้าต่างหลัก
+            if (window.top !== window.self && (window.location.pathname.includes('/~/+/') || currentHref.includes('mode=admin?mode=admin'))) {
+                window.top.location.href = cleanUrl;
+            } else if (window.location.href !== cleanUrl && (currentHref.includes('mode=admin?mode=admin') || currentHref.includes('/+/'))) {
+                // 2. ถ้าเป็นหน้าต่างหลัก แต่ URL มีความซ้ำซ้อน ให้คลีน URL ทันที
+                window.history.replaceState(null, '', cleanUrl);
+            }
+        }
+    } catch(e) {}
+})();
+</script>
 """, unsafe_allow_html=True)
 
 # ==============================================================================
@@ -495,7 +528,13 @@ init_db()
 # - หน้าจัดการหลังร้าน: https://domain/?mode=admin
 # - หน้าร้าน/ลูกค้าสั่งอาหาร: https://domain/?table=1
 params = st.query_params
-is_admin_mode = (params.get("mode", "") == "admin")
+raw_mode = str(params.get("mode", ""))
+is_admin_mode = ("admin" in raw_mode.lower())
+
+# ปรับคลีน st.query_params ในระบบให้สะอาดสวยงาม ไม่มีตัวแปรซ้ำ
+if is_admin_mode and params.get("mode") != "admin":
+    st.query_params.clear()
+    st.query_params["mode"] = "admin"
 
 # ที่อยู่ไฟล์รูปภาพโลโก้ของร้านฟ้าใสตำนัว
 logo_path = "static/img/logo.png"
@@ -515,6 +554,24 @@ def get_base64_image(image_path):
         with open(image_path, "rb") as img_file:
             return base64.b64encode(img_file.read()).decode()
     return ""
+
+def get_current_base_url(default="https://tumnua1-cae26py9kvbzmz4juo3sey.streamlit.app"):
+    """
+    ตรวจจับ URL ของเว็บไซต์อัตโนมัติจาก Request Headers เพื่อใช้สร้าง QR Code
+    ข้อดี: ไม่ว่าจะนำโค้ดไปเปิดใช้งานกับร้านใหม่ บัญชีใหม่ หรือโดเมนใดๆ 
+    ระบบจะตรวจจับชื่อโดเมนใหม่อัตโนมัติทันที ไม่ต้องแก้โค้ดด้วยมือ
+    """
+    try:
+        if hasattr(st, 'context') and hasattr(st.context, 'headers'):
+            hdrs = st.context.headers
+            host = hdrs.get("x-forwarded-host") or hdrs.get("host")
+            proto = hdrs.get("x-forwarded-proto", "https")
+            if host:
+                clean_host = host.split(",")[0].strip()
+                return f"{proto}://{clean_host}"
+    except Exception:
+        pass
+    return default
 
 @st.cache_data
 def get_bell_sound_b64():
@@ -1197,8 +1254,8 @@ if is_admin_mode:
 
         existing_nums = [r[0] for r in table_statuses]
         
-        # ลิงก์ร้านสำหรับสร้าง QR-Code อัตโนมัติ
-        base_url_for_qr = "https://tumnua1-cae26py9kvbzmz4juo3sey.streamlit.app/"
+        # ลิงก์ร้านสำหรับสร้าง QR-Code (ตรวจจับโดเมนอัตโนมัติ ไม่ว่าจะเปิดในร้านใด/บัญชีใด)
+        base_url_for_qr = get_current_base_url()
 
         # ส่วนที่ 1: เมนู เพิ่ม / ลบ โต๊ะอาหารในร้าน
         st.markdown("### ⚙️ 1. เพิ่ม / ลบ โต๊ะอาหารในร้าน")
@@ -1619,7 +1676,7 @@ else:
         st.write("---")
         st.warning("⚠️ ขณะนี้ทางร้านยังไม่ได้เปิดโต๊ะอาหารในระบบ")
         st.info("กรุณาติดต่อพนักงานที่เคาน์เตอร์ หรือเปิดโต๊ะในระบบหลังร้านก่อนนะคะ 🌶️")
-        st.markdown("<div style='text-align: center; margin-top: 15px;'><a href='?mode=admin' style='color: #ea580c; text-decoration: none; font-weight: bold;'>⚙️ ไปที่ระบบจัดการหลังร้าน</a></div>", unsafe_allow_html=True)
+        st.markdown("<div style='text-align: center; margin-top: 15px;'><a href='/?mode=admin' target='_top' style='color: #ea580c; text-decoration: none; font-weight: bold;'>⚙️ ไปที่ระบบจัดการหลังร้าน</a></div>", unsafe_allow_html=True)
         st.stop()
         valid_tables = [1]
 
