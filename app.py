@@ -21,6 +21,8 @@ import math                                # ฟังก์ชันคณิ�
 import io                                  # จัดการข้อมูลในหน่วยความจำ RAM (In-Memory Buffer)
 from datetime import datetime, timedelta, timezone # จัดการวันและเวลา
 from urllib.parse import quote             # เข้ารหัส URL สำหรับสร้างภาพ QR Code
+import hashlib                              # แฮชรหัสผ่านอย่างปลอดภัย (SHA-256 + Salt)
+import hmac                                 # เปรียบเทียบรหัสผ่านแบบ Timing-attack safe
 
 # --- ตั้งค่าเวลาประเทศไทย (UTC+7 / Asia/Bangkok) ---
 # เนื่องจากเซิร์ฟเวอร์ Cloud (เช่น Streamlit Cloud) มักตั้งเวลาเป็น UTC (ช้ากว่าไทย 7 ชม.)
@@ -214,102 +216,150 @@ div[data-testid="stRadio"] label[data-baseweb="radio"][aria-checked="true"] span
 }
 
 /* 🔖 แถบเมนูแท็บสไตล์ที่คั่นหนังสือ (Bookmark Tabs) ขอบบนมน 2 มุม */
+div[data-testid="stTabs"] div[role="tablist"],
 div[data-baseweb="tab-list"] {
     gap: 8px !important;
     background-color: transparent !important;
-    border-bottom: 2px solid #e2e8f0 !important;
+    border-bottom: 2px solid #fed7aa !important;
     padding-bottom: 0px !important;
 }
 
+div[data-testid="stTabs"] div[data-baseweb="tab-highlight"],
 div[data-baseweb="tab-highlight"] {
     display: none !important; /* ซ่อนเส้นขีดสีแดงเดิม */
 }
 
-/* ตั้งค่าสไตล์พื้นฐานของแท็บทั้งหมด */
-button[data-baseweb="tab"] {
-    border-top-left-radius: 12px !important;   /* มนมุมบนซ้าย */
-    border-top-right-radius: 12px !important;  /* มนมุมบนขวา */
+/* สไตล์พื้นฐานของแท็บทั้งหมด (ทั้ง button และ [role="tab"]) */
+div[data-testid="stTabs"] button[role="tab"],
+button[data-baseweb="tab"],
+div[data-baseweb="tab-list"] > button {
+    border-top-left-radius: 14px !important;   /* มนมุมบนซ้าย */
+    border-top-right-radius: 14px !important;  /* มนมุมบนขวา */
     border-bottom-left-radius: 0px !important;
     border-bottom-right-radius: 0px !important;
     padding: 10px 18px !important;
-    margin-right: 4px !important;
+    margin-right: 6px !important;
     font-weight: 600 !important;
     font-size: 15px !important;
     transition: all 0.2s ease-in-out !important;
-    border: 1px solid transparent !important;
+    border: 2px solid transparent !important;
     border-bottom: none !important;
 }
 
-/* 🟢 แท็บที่ 1: จัดการโต๊ะอาหาร & เคลียร์โต๊ะ -> สีเขียว (Green / Mint Bookmark) */
-button[data-baseweb="tab"]:nth-of-type(1) {
+/* 🟢 แท็บที่ 1: จัดการโต๊ะอาหาร & เคลียร์โต๊ะ -> สีเขียว (Green Bookmark) */
+div[data-testid="stTabs"] button[role="tab"]:nth-child(1),
+div[data-baseweb="tab-list"] > button:nth-of-type(1) {
     background-color: #ecfdf5 !important;
     color: #065f46 !important;
     border-color: #a7f3d0 !important;
 }
-button[data-baseweb="tab"]:nth-of-type(1):hover {
+div[data-testid="stTabs"] button[role="tab"]:nth-child(1) p,
+div[data-baseweb="tab-list"] > button:nth-of-type(1) p {
+    color: #065f46 !important;
+}
+div[data-testid="stTabs"] button[role="tab"]:nth-child(1):hover,
+div[data-baseweb="tab-list"] > button:nth-of-type(1):hover {
     background-color: #d1fae5 !important;
     color: #047857 !important;
 }
-button[data-baseweb="tab"]:nth-of-type(1)[aria-selected="true"] {
+div[data-testid="stTabs"] button[role="tab"]:nth-child(1)[aria-selected="true"],
+div[data-baseweb="tab-list"] > button:nth-of-type(1)[aria-selected="true"] {
     background: linear-gradient(180deg, #10b981 0%, #059669 100%) !important;
     color: #ffffff !important;
-    box-shadow: 0 -2px 10px rgba(16, 185, 129, 0.3) !important;
-    font-weight: 700 !important;
+    box-shadow: 0 -3px 12px rgba(16, 185, 129, 0.35) !important;
     border-color: #047857 !important;
+}
+div[data-testid="stTabs"] button[role="tab"]:nth-child(1)[aria-selected="true"] p,
+div[data-baseweb="tab-list"] > button:nth-of-type(1)[aria-selected="true"] p {
+    color: #ffffff !important;
+    font-weight: 700 !important;
 }
 
 /* 🟤 แท็บที่ 2: จอครัว & เคาน์เตอร์คิดเงิน -> สีน้ำตาล (Warm Brown Bookmark) */
-button[data-baseweb="tab"]:nth-of-type(2) {
-    background-color: #fdf8f6 !important;
-    color: #7c2d12 !important;
-    border-color: #fed7aa !important;
+div[data-testid="stTabs"] button[role="tab"]:nth-child(2),
+div[data-baseweb="tab-list"] > button:nth-of-type(2) {
+    background-color: #fef3c7 !important;
+    color: #78350f !important;
+    border-color: #fde68a !important;
 }
-button[data-baseweb="tab"]:nth-of-type(2):hover {
-    background-color: #ffedd5 !important;
-    color: #9a3412 !important;
+div[data-testid="stTabs"] button[role="tab"]:nth-child(2) p,
+div[data-baseweb="tab-list"] > button:nth-of-type(2) p {
+    color: #78350f !important;
 }
-button[data-baseweb="tab"]:nth-of-type(2)[aria-selected="true"] {
-    background: linear-gradient(180deg, #9a3412 0%, #7c2d12 100%) !important;
+div[data-testid="stTabs"] button[role="tab"]:nth-child(2):hover,
+div[data-baseweb="tab-list"] > button:nth-of-type(2):hover {
+    background-color: #fde68a !important;
+    color: #78350f !important;
+}
+div[data-testid="stTabs"] button[role="tab"]:nth-child(2)[aria-selected="true"],
+div[data-baseweb="tab-list"] > button:nth-of-type(2)[aria-selected="true"] {
+    background: linear-gradient(180deg, #854d0e 0%, #713f12 100%) !important;
     color: #ffffff !important;
-    box-shadow: 0 -2px 10px rgba(154, 52, 18, 0.3) !important;
+    box-shadow: 0 -3px 12px rgba(133, 77, 14, 0.35) !important;
+    border-color: #713f12 !important;
+}
+div[data-testid="stTabs"] button[role="tab"]:nth-child(2)[aria-selected="true"] p,
+div[data-baseweb="tab-list"] > button:nth-of-type(2)[aria-selected="true"] p {
+    color: #ffffff !important;
     font-weight: 700 !important;
-    border-color: #7c2d12 !important;
 }
 
 /* 🔵 แท็บที่ 3: เมนูขายดี -> สีฟ้า (Sky Blue Bookmark) */
-button[data-baseweb="tab"]:nth-of-type(3) {
-    background-color: #f0f9ff !important;
+div[data-testid="stTabs"] button[role="tab"]:nth-child(3),
+div[data-baseweb="tab-list"] > button:nth-of-type(3) {
+    background-color: #e0f2fe !important;
     color: #0369a1 !important;
     border-color: #bae6fd !important;
 }
-button[data-baseweb="tab"]:nth-of-type(3):hover {
-    background-color: #e0f2fe !important;
+div[data-testid="stTabs"] button[role="tab"]:nth-child(3) p,
+div[data-baseweb="tab-list"] > button:nth-of-type(3) p {
+    color: #0369a1 !important;
+}
+div[data-testid="stTabs"] button[role="tab"]:nth-child(3):hover,
+div[data-baseweb="tab-list"] > button:nth-of-type(3):hover {
+    background-color: #bae6fd !important;
     color: #0284c7 !important;
 }
-button[data-baseweb="tab"]:nth-of-type(3)[aria-selected="true"] {
+div[data-testid="stTabs"] button[role="tab"]:nth-child(3)[aria-selected="true"],
+div[data-baseweb="tab-list"] > button:nth-of-type(3)[aria-selected="true"] {
     background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%) !important;
     color: #ffffff !important;
-    box-shadow: 0 -2px 10px rgba(2, 132, 199, 0.3) !important;
-    font-weight: 700 !important;
+    box-shadow: 0 -3px 12px rgba(2, 132, 199, 0.35) !important;
     border-color: #0284c7 !important;
 }
+div[data-testid="stTabs"] button[role="tab"]:nth-child(3)[aria-selected="true"] p,
+div[data-baseweb="tab-list"] > button:nth-of-type(3)[aria-selected="true"] p {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
 
-/* 🟣 แท็บที่ 4: ประวัติลูกค้า -> สีม่วง/พาสเทลสุภาพ */
-button[data-baseweb="tab"]:nth-of-type(4) {
+/* 🟣 แท็บที่ 4: ประวัติลูกค้า -> สีม่วง/พาสเทล */
+div[data-testid="stTabs"] button[role="tab"]:nth-child(4),
+div[data-baseweb="tab-list"] > button:nth-of-type(4) {
     background-color: #faf5ff !important;
     color: #6b21a8 !important;
     border-color: #e9d5ff !important;
 }
-button[data-baseweb="tab"]:nth-of-type(4):hover {
+div[data-testid="stTabs"] button[role="tab"]:nth-child(4) p,
+div[data-baseweb="tab-list"] > button:nth-of-type(4) p {
+    color: #6b21a8 !important;
+}
+div[data-testid="stTabs"] button[role="tab"]:nth-child(4):hover,
+div[data-baseweb="tab-list"] > button:nth-of-type(4):hover {
     background-color: #f3e8ff !important;
     color: #7e22ce !important;
 }
-button[data-baseweb="tab"]:nth-of-type(4)[aria-selected="true"] {
+div[data-testid="stTabs"] button[role="tab"]:nth-child(4)[aria-selected="true"],
+div[data-baseweb="tab-list"] > button:nth-of-type(4)[aria-selected="true"] {
     background: linear-gradient(180deg, #9333ea 0%, #7e22ce 100%) !important;
     color: #ffffff !important;
-    box-shadow: 0 -2px 10px rgba(147, 51, 234, 0.3) !important;
-    font-weight: 700 !important;
+    box-shadow: 0 -3px 12px rgba(147, 51, 234, 0.35) !important;
     border-color: #7e22ce !important;
+}
+div[data-testid="stTabs"] button[role="tab"]:nth-child(4)[aria-selected="true"] p,
+div[data-baseweb="tab-list"] > button:nth-of-type(4)[aria-selected="true"] p {
+    color: #ffffff !important;
+    font-weight: 700 !important;
 }
 
 /* ซ่อนแถบเมนูที่ไม่จำเป็นของ Streamlit เพื่อประสบการณ์แบบ App แท้ */
@@ -613,6 +663,50 @@ def init_db():
     c.execute('DELETE FROM menu_items')
     c.executemany('INSERT OR REPLACE INTO menu_items (name, category, price, cost, image, description) VALUES (?, ?, ?, ?, ?, ?)', fahsai_menu)
 
+    # 👥 ข้อมูลสมาชิกจำลองเริ่มต้น 10 คน (ถ้ายังไม่มีสมาชิกในระบบ)
+    c.execute("SELECT COUNT(*) FROM members")
+    if c.fetchone()[0] == 0:
+        sample_members = [
+            ("สมชาย", "สายกิน", "0812345678", 85, "2026-09-15 11:30:00"),
+            ("กานดา", "สุขสมบูรณ์", "0898765432", 64, "2026-09-18 12:45:00"),
+            ("ปิยะพงษ์", "รักนัว", "0923456789", 52, "2026-09-20 18:20:00"),
+            ("อรทัย", "แซ่บหลาย", "0861122334", 41, "2026-09-25 13:10:00"),
+            ("นฤมล", "ทองดี", "0956677889", 35, "2026-10-01 17:50:00"),
+            ("ธนกร", "มีทรัพย์", "0845566778", 28, "2026-10-02 12:15:00"),
+            ("ชญาดา", "พัฒนาเลิศ", "0937734851", 20, "2026-10-04 11:00:00"),
+            ("วรวิทย์", "เจริญผล", "0879988776", 15, "2026-10-05 19:30:00"),
+            ("สุภาวรรณ", "ใจดี", "0912233445", 10, "2026-10-07 14:00:00"),
+            ("กิตติศักดิ์", "ยอดเยี่ยม", "0834455667", 6, "2026-10-08 16:20:00")
+        ]
+        c.executemany(
+            "INSERT INTO members (first_name, last_name, phone, points, created_at) VALUES (?, ?, ?, ?, ?)",
+            sample_members
+        )
+
+    # 6. ตารางผู้ดูแลระบบ / ผู้ใช้งานหลังร้าน (admin_users)
+    # เก็บรหัสผ่านแบบเข้ารหัส Secure Hash (SHA-256 + Salt)
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS admin_users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL UNIQUE,     -- ชื่อผู้ใช้งานสำหรับล็อกอิน
+            password_hash TEXT NOT NULL,       -- รหัสผ่านที่เข้ารหัสแฮชแล้ว
+            salt TEXT NOT NULL,                -- ค่า Salt ป้องกัน Rainbow Table
+            full_name TEXT,                    -- ชื่อ-นามสกุลเจ้าหน้าที่
+            role TEXT DEFAULT 'admin',         -- บทบาท: admin, manager, cashier
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
+    # สร้างบัญชีผู้ดูแลระบบเริ่มต้น (Default Admin) หากยังไม่มี
+    c.execute("SELECT COUNT(*) FROM admin_users")
+    if c.fetchone()[0] == 0:
+        def_salt = "fahsai_salt_secure_2026"
+        def_hash = hashlib.sha256((def_salt + "admin1234").encode('utf-8')).hexdigest()
+        c.execute("""
+            INSERT INTO admin_users (username, password_hash, salt, full_name, role)
+            VALUES (?, ?, ?, ?, ?)
+        """, ("admin", def_hash, def_salt, "ผู้ดูแลระบบ (Admin)", "admin"))
+
     conn.commit()
     conn.close()
 
@@ -653,6 +747,19 @@ def get_base64_image(image_path):
         with open(image_path, "rb") as img_file:
             return base64.b64encode(img_file.read()).decode()
     return ""
+
+def hash_password(password, salt=None):
+    """เข้ารหัสผ่านด้วย SHA-256 ผสม Salt ป้องกันการขโมยรหัสผ่าน"""
+    if not salt:
+        import secrets
+        salt = secrets.token_hex(8)
+    pw_hash = hashlib.sha256((salt + password).encode('utf-8')).hexdigest()
+    return pw_hash, salt
+
+def verify_password(input_password, stored_hash, salt):
+    """ตรวจสอบรหัสผ่านที่ป้อนเข้ามา เทียบกับค่า Hash ที่บันทึกไว้ในฐานข้อมูล"""
+    calc_hash = hashlib.sha256((salt + input_password).encode('utf-8')).hexdigest()
+    return hmac.compare_digest(calc_hash, stored_hash)
 
 def get_current_base_url(default="https://tumnua1-cae26py9kvbzmz4juo3sey.streamlit.app"):
     """
@@ -1293,7 +1400,12 @@ def render_pos_dashboard():
 # 2. จอครัว & เคาน์เตอร์คิดเงิน (KDS)
 # 3. อันดับเมนูขายดี
 if is_admin_mode:
-    # Header ปรับขนาดภาพโลโก้ให้ใหญ่ขึ้น สวยงาม คมชัด จัดกลางอย่างลงตัว
+    # ตรวจสอบสถานะการเข้าสู่ระบบ (Admin Authentication Check)
+    if 'admin_logged_in' not in st.session_state:
+        st.session_state['admin_logged_in'] = False
+        st.session_state['admin_user_info'] = None
+
+    # Header โลโก้ร้าน
     logo_b64 = get_base64_image(logo_path)
     if logo_b64:
         logo_html = f'''<div style="text-align: center; margin-bottom: 8px;">
@@ -1306,16 +1418,91 @@ if is_admin_mode:
     else:
         logo_html = '<div style="text-align: center; font-size: 75px; margin-bottom: 4px;">🌶️</div>'
 
+    # 🔒 กรณีที่ยังไม่ได้ลงชื่อเข้าใช้: แสดงฟอร์ม Login ปลอดภัย
+    if not st.session_state['admin_logged_in']:
+        login_header_html = f'''
+        {logo_html}
+        <h1 style="text-align: center; color: #c2410c; font-weight: 800; font-size: 2.3rem; margin: 4px 0 2px 0; line-height: 1.2;">
+            ฟ้าใสตำนัว (ระบบจัดการหลังร้าน)
+        </h1>
+        <p style="text-align: center; color: #78716c; font-size: 1.05rem; margin: 0 0 16px 0;">
+            🔐 กรุณาลงชื่อเข้าใช้งานเพื่อเข้าถึงระบบจัดการร้าน จอครัว และเคาน์เตอร์คิดเงิน
+        </p>
+        '''
+        st.markdown(login_header_html, unsafe_allow_html=True)
+        st.write("---")
+
+        col_l1, col_l2, col_l3 = st.columns([1, 1.6, 1])
+        with col_l2:
+            with st.container(border=True):
+                st.markdown("<h3 style='text-align: center; color: #431407; margin-bottom: 4px;'>เข้าสู่ระบบผู้ดูแลร้าน</h3>", unsafe_allow_html=True)
+                st.caption("ป้อนชื่อผู้ใช้งานและรหัสผ่านเพื่อยืนยันสิทธิ์")
+                
+                with st.form("admin_login_form"):
+                    input_user = st.text_input("👤 ชื่อผู้ใช้ (Username):", placeholder="เช่น admin", key="inp_admin_user")
+                    input_pass = st.text_input("🔑 รหัสผ่าน (Password):", type="password", placeholder="ป้อนรหัสผ่าน", key="inp_admin_pass")
+                    submit_login = st.form_submit_button("🔓 ลงชื่อเข้าใช้", type="primary", use_container_width=True)
+
+                    if submit_login:
+                        if not input_user.strip() or not input_pass.strip():
+                            st.error("กรุณากรอกชื่อผู้ใช้งานและรหัสผ่านให้ครบถ้วนค่ะ")
+                        else:
+                            conn_auth = sqlite3.connect(DB_NAME)
+                            c_auth = conn_auth.cursor()
+                            c_auth.execute("SELECT id, username, password_hash, salt, full_name, role FROM admin_users WHERE username = ?", (input_user.strip(),))
+                            user_record = c_auth.fetchone()
+                            conn_auth.close()
+
+                            if user_record and verify_password(input_pass.strip(), user_record[2], user_record[3]):
+                                st.session_state['admin_logged_in'] = True
+                                st.session_state['admin_user_info'] = {
+                                    'id': user_record[0],
+                                    'username': user_record[1],
+                                    'full_name': user_record[4],
+                                    'role': user_record[5]
+                                }
+                                st.toast(f"ยินดีต้อนรับ {user_record[4]} เข้าสู่ระบบค่ะ! 🎉", icon="✅")
+                                st.rerun()
+                            else:
+                                st.error("❌ ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้งค่ะ")
+
+                st.markdown("""
+                <div style='background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 10px 14px; margin-top: 14px; font-size: 0.88rem; color: #92400e;'>
+                    💡 <b>บัญชีเริ่มต้นของระบบ (Default Login):</b><br>
+                    • ชื่อผู้ใช้: <code>admin</code><br>
+                    • รหัสผ่าน: <code>admin1234</code><br>
+                    <i>(รหัสผ่านถูกเข้ารหัส SHA-256 + Salt เก็บในฐานข้อมูลอย่างปลอดภัย)</i>
+                </div>
+                """, unsafe_allow_html=True)
+
+        render_app_footer()
+        st.stop()
+
+    # 🔓 กรณีที่ลงชื่อเข้าใช้สำเร็จแล้ว: แสดงแถบข้อมูลผู้ใช้งาน + ปุ่มออกจากระบบ
+    u_info = st.session_state.get('admin_user_info') or {}
+    u_name = u_info.get('full_name', 'ผู้ดูแลระบบ')
+    u_role = u_info.get('role', 'admin')
+
     header_html = f'''
     {logo_html}
     <h1 style="text-align: center; color: #c2410c; font-weight: 800; font-size: 2.3rem; margin: 4px 0 2px 0; line-height: 1.2;">
         ฟ้าใสตำนัว (ระบบจัดการหลังร้าน)
     </h1>
-    <p style="text-align: center; color: #78716c; font-size: 1.05rem; margin: 0 0 14px 0;">
+    <p style="text-align: center; color: #78716c; font-size: 1.05rem; margin: 0 0 10px 0;">
         👨‍🍳 หน้าจอเคาน์เตอร์คิดเงิน • ครัวปรุงอาหาร • อันดับเมนูขายดี
     </p>
     '''
     st.markdown(header_html, unsafe_allow_html=True)
+
+    # แถบผู้ใช้งานเข้าสู่ระบบ & ปุ่มออกจากระบบ
+    col_u1, col_u2 = st.columns([3, 1])
+    with col_u1:
+        st.markdown(f"<div style='font-size: 15px; color: #166534; font-weight: 600; padding-top: 6px;'>🟢 เข้าสู่ระบบในนาม: <b>{u_name}</b> (สิทธิ์: {u_role})</div>", unsafe_allow_html=True)
+    with col_u2:
+        if st.button("🚪 ออกจากระบบ (Logout)", key="btn_admin_logout", use_container_width=True):
+            st.session_state['admin_logged_in'] = False
+            st.session_state['admin_user_info'] = None
+            st.rerun()
 
     st.write("---")
 
