@@ -555,7 +555,7 @@ def get_base64_image(image_path):
             return base64.b64encode(img_file.read()).decode()
     return ""
 
-def get_current_base_url(default="https://tumnua1-cae26py9kvbzmz4juo3sey.streamlit.app"):
+def get_current_base_url(default="hhttps://tumnua1-cae26py9kvbzmz4juo3sey.streamlit.app/"):
     """
     ตรวจจับ URL ของเว็บไซต์อัตโนมัติจาก Request Headers เพื่อใช้สร้าง QR Code
     ข้อดี: ไม่ว่าจะนำโค้ดไปเปิดใช้งานกับร้านใหม่ บัญชีใหม่ หรือโดเมนใดๆ 
