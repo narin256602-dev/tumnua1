@@ -703,7 +703,7 @@ def init_db():
     c.execute("SELECT COUNT(*) FROM admin_users")
     if c.fetchone()[0] == 0:
         def_salt = "fahsai_salt_secure_2026"
-        def_hash = hashlib.sha256((def_salt + "Ratthapum@12092006").encode('utf-8')).hexdigest() #เปลี่ยนรหัสตามต้องการ 
+        def_hash = hashlib.sha256((def_salt + "Ratthapum@12092006").encode('utf-8')).hexdigest()  
         c.execute("""
             INSERT INTO admin_users (username, password_hash, salt, full_name, role)
             VALUES (?, ?, ?, ?, ?)
