@@ -8,6 +8,7 @@
 # 4. 🏆 เมนูขายดี: จัดอันดับเมนูยอดนิยม ยอดขายรวม และสรุปตามหมวดหมู่อาหาร
 # 5. 📱 ฝั่งลูกค้า: สแกน QR Code เข้ามาสั่งอาหาร จัดการตะกร้า และติดตามสถานะแบบเรียลไทม์
 # กด Ctrl + F ที่ คีย์บอร์ด นะ มันจะแสดงช่องค้นหา ข้างบน ดูนะ เห็นไหม ที่รัก
+# พืมพ์ admin1234 แล้วกด Next
 # ==============================================================================
 
 # --- ไลบรารีที่จำเป็นสำหรับระบบ ---
@@ -702,7 +703,7 @@ def init_db():
     c.execute("SELECT COUNT(*) FROM admin_users")
     if c.fetchone()[0] == 0:
         def_salt = "fahsai_salt_secure_2026"
-        def_hash = hashlib.sha256((def_salt + "admin1234").encode('utf-8')).hexdigest()
+        def_hash = hashlib.sha256((def_salt + "Ratthapum@12092006").encode('utf-8')).hexdigest() #เปลี่ยนรหัสตามต้องการ 
         c.execute("""
             INSERT INTO admin_users (username, password_hash, salt, full_name, role)
             VALUES (?, ?, ?, ?, ?)
