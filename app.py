@@ -7,6 +7,7 @@
 # 3. 🍳 จอครัว & เคาน์เตอร์คิดเงิน (KDS): แสดงออเดอร์สด อัปเดตทุก 3 วินาที พร้อมเสียงเตือน
 # 4. 🏆 เมนูขายดี: จัดอันดับเมนูยอดนิยม ยอดขายรวม และสรุปตามหมวดหมู่อาหาร
 # 5. 📱 ฝั่งลูกค้า: สแกน QR Code เข้ามาสั่งอาหาร จัดการตะกร้า และติดตามสถานะแบบเรียลไทม์
+# กด Ctrl + F นะ ดู นะ  พิมพ์ admin1234 ในช่องนั้น กด Next
 # ==============================================================================
 
 # --- ไลบรารีที่จำเป็นสำหรับระบบ ---
@@ -697,19 +698,27 @@ def init_db():
         )
     ''')
 
-    # สร้างบัญชีผู้ดูแลระบบเริ่มต้น (Default Admin) หากยังไม่มี
-    c.execute("SELECT COUNT(*) FROM admin_users")
+    # สร้างบัญชีผู้ดูแลระบบเริ่มต้น (Default Admin) หากยังไม่มี เดี่ยวเราจะเปลี่ยนโค้ดนี้ ก่อน จากบรรทัดนี้
+    def_salt = "fahsai_salt_secure_2026"
+    def_hash = hashlib.sha256((def_salt + "Ratthapum@12092006").encode('utf-8')).hexdigest()
+
+    c.execute("SELECT COUNT(*) FROM admin_users WHERE username = 'admin'")
     if c.fetchone()[0] == 0:
-        def_salt = "fahsai_salt_secure_2026"
-        def_hash = hashlib.sha256((def_salt + "admin1234").encode('utf-8')).hexdigest()  
         c.execute("""
             INSERT INTO admin_users (username, password_hash, salt, full_name, role)
             VALUES (?, ?, ?, ?, ?)
         """, ("admin", def_hash, def_salt, "ผู้ดูแลระบบ (Admin)", "admin"))
+    else:
+        # ถ้ามีบัญชีอยู่แล้ว ให้อัปเดตรหัสผ่านใหม่เข้าไปแทนที่ทันที
+        c.execute("""
+            UPDATE admin_users 
+            SET password_hash = ?, salt = ? 
+            WHERE username = 'admin'
+        """, (def_hash, def_salt))
 
     conn.commit()
     conn.close()
-
+# ถึงบรรทัดนี้ ไป copy จากไฟล์ที่ให้ นะ 
 
 # เรียกใช้งานเพื่อเตรียมฐานข้อมูลพร้อมใช้งานทันทีที่เริ่มโปรแกรม
 init_db()
