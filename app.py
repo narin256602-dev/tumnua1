@@ -649,8 +649,8 @@ def init_db():
 
         # --- 10. หมวด "เครื่องดื่ม" ---
         ("น้ำเปล่า", "เครื่องดื่ม", 15, 6, "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=600&q=80", "น้ำดื่มบริสุทธิ์ขวดเย็นชื่นใจ"),
-        ("น้ำแข็ง", "เครื่องดื่ม", 10, 3, "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=600&q=80", "น้ำแข็งหลอดสะอาดใส่กระติก/แก้ว"),
-        ("น้ำอัดลม", "เครื่องดื่ม", 25, 12, "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=600&q=80", "โคล่า/น้ำอัดลมกระป๋องเย็นซ่าสดชื่น"),
+        ("น้ำแข็ง", "เครื่องดื่ม", 10, 3, "https://img2.pic.in.th/233e5fc73ad2dcb26203a9036484ca0e.png", "น้ำแข็งหลอดสะอาดใส่กระติก/แก้ว"),
+        ("น้ำอัดลม", "เครื่องดื่ม", 25, 12, "https://img1.pic.in.th/images/Screenshot-2026-10-12-222333.png?auto=format&fit=crop&w=600&q=80", "โคล่า/น้ำอัดลมกระป๋องเย็นซ่าสดชื่น"),
         ("น้ำแดง", "เครื่องดื่ม", 25, 10, "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=600&q=80", "น้ำหวานกลิ่นสละ หอมหวานเย็นชื่นใจ"),
         ("น้ำเขียว", "เครื่องดื่ม", 25, 10, "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=600&q=80", "น้ำหวานกลิ่นครีมโซดา สดชื่นดับกระหาย"),
         ("ชามะนาว", "เครื่องดื่ม", 35, 12, "https://images.unsplash.com/photo-1558857563-b371033873b8?auto=format&fit=crop&w=600&q=80", "ชาดำแท้ผสมน้ำมะนาวคั้นสด เปรี้ยวหวานลงตัว"),
